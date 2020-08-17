@@ -1,0 +1,170 @@
+%
+% The first command in your LaTeX source must be the \documentclass command.
+\documentclass[acmlarge,screen]{acmart}
+
+% remove basicaly everything from the heading and footing
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+
+%
+% defining the \BibTeX command - from Oren Patashnik's original BibTeX documentation.
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08emT\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+%
+% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%
+% The "title" command has an optional parameter, allowing the author to define a "short title" to be used in page headers.
+% REPLACE
+\title{Windows Subsystem for Linux Version 2}
+
+%
+% The "author" command and its associated commands are used to define the authors and their affiliations.
+% Of note is the shared affiliation of the first two authors, and the "authornote" and "authornotemark" commands
+% used to denote shared contribution to the research.
+% REPLACE
+\author{Nicolas JALLET}
+\email{jallet.e1903007@etud.univ-ubs.fr}
+\orcid{1234-5678-9012}
+\affiliation{
+  \institution{ENSIBS}
+  \streetaddress{Rue Yves Mainguy}
+  \city{Vannes}
+  \state{France}
+  \postcode{56000}
+}
+
+\author{Bérenger BRAULT}
+\email{brault.e1701016@etud.univ-ubs.fr}
+\orcid{1234-5678-9012}
+\affiliation{
+  \institution{ENSIBS}
+  \streetaddress{Rue Yves Mainguy}
+  \city{Vannes}
+  \state{France}
+  \postcode{56000}
+}
+
+%
+% The abstract is a short summary of the work to be presented in the article.
+% REPLACE
+\begin{abstract}
+Depuis quelques années, Microsoft s'est tourné vers l'Open Source en témoigne le rachat de Github. Ce type de licence est très apprécié de la communauté qui à la possibilité d'accéder aux codes sources et d'y effectuer des améliorations mais également par les développeurs car la communauté peut également remonter des bugs.
+Le seul moyen pour Microsoft d'intégrer les outils du monde Linux dans son système est de passer par la virtualisation.
+La virtualisation permet de lancer des applications qui ne sont pas compatible nativement sur un système d'exploitation.
+Microsoft s'est penché sur le sujet en développant un outil basé sur l'hyperviseur de type 1 Hyper-V appelé \textbf{Windows Subsystem for Linux} (WSL).
+Ce projet permet d'utiliser Windows pour réaliser des tâches qui ne sont possible que sur un système UNIX ou sur un dérivé.
+Le souhait des concepteurs est de faire devenir Windows l'outil préféré des développeurs. 
+Ce document va présenter le concept ainsi que les limites actuelles de l'outil.
+\end{abstract}
+
+%
+% Keywords. The author(s) should pick words that accurately describe the work being
+% presented. Separate the keywords with commas.
+% REPLACE
+\keywords{Microsoft, Windows, Linux, WSL, Virtualisation}
+
+%
+% A "teaser" image appears between the author and affiliation information and the body 
+% of the document, and typically spans the page.
+% REPLACE IF WANTED
+%%\begin{teaserfigure}
+%%  \includegraphics[width=\textwidth]{sampleteaser}
+%%  \caption{Seattle Mariners at Spring Training, 2010.}
+%%  \Description{Enjoying the baseball game from the third-base seats. Ichiro Suzuki preparing to bat.}
+%%  \label{fig:teaser}
+%%\end{teaserfigure}
+
+%
+% This command processes the author and affiliation and title information and builds
+% the first part of the formatted document.
+\maketitle
+
+%
+% Start of real shit here
+\textbf{\section{Introduction}}
+L’Open-source est un modèle économique permettant à une communauté d’accéder au code source d’une application, l’accès y est complètement gratuit et il est possible de modifier le contenu à sa guise. De plus, il est souvent possible de remonter des bugs d’implémentation. Ce modèle est très apprécié par la communauté en témoigne la monté en puissance du système UNIX et de ses dérivés depuis plusieurs années.
+Microsoft a décidé de se lancer pleinement dans l’Open Source depuis le rachat de Github le 4 juin 2018 pour 7,5 milliard de dollars. Ensuite, en 2018, Microsoft lance un nouveau projet en partenariat avec les développeurs de la communauté Linux appelé Windows Subsystem for Linux (WSL).
+WSL est une couche de compatibilité permettant d’exécuter des binaires Linux (au format ELF) de manière native sur Windows 10 et Windows server 2019 \textbf{[4]}. Microsoft a introduit la deuxième version de ce projet lors d’une conférence Microsoft Build avant juin 2019. Cette nouvelle version comporte d’important changement, notamment avec l’intégration d’une véritable couche de virtualisation basée sur l’hyperviseur de type 1 “Hyper-V” \textbf{[1,5]}. Cette couche a permis d’ajouter un véritable noyau Linux à coté de celui de Windows (kernel). Cette version de WSL est compatible sur toutes les éditions de Windows 10. Le but est de ramener dans un même environnement le meilleur des deux mondes Windows et Linux.
+
+La vocation de la première partie est de présenter WSL de manière générale. Nous parlerons de son fonctionnement et enfin des limites actuelles du projet de Microsoft.
+
+\textbf{\section{Présentation générale}}
+La technologie à l'origine de WSL est issue du projet non publié Astoria, qui permettait à certaines applications Android de s'exécuter sur Windows 10 Mobile
+Microsoft présente WSL comme un outil pour les développeurs - en particulier les développeurs Web et ceux qui travaillent sur ou avec des projets open source"16. WSL utilise moins de ressources qu'une machine virtuelle classique (avant WSL, une machine virtuelle était le moyen le plus direct pour exécuter un logiciel Linux dans un environnement Windows), tout en permettant aux utilisateurs d'utiliser des applications Windows et des outils Linux sur le même ensemble de fichiers. 
+
+\textbf{\section{Fonctionnement}}
+\textbf{\subsection{WSL1}}
+
+Alors que les projets précédents de Microsoft et de Cygwin s’étaient concentrés sur la création de leurs propres environnements de type Unix basés sur le standard POSIX, WSL vise la compatibilité native avec Linux. Au lieu d'encapsuler les fonctionnalités non natives dans les appels système Win32, la conception initiale de WSL (WSL1) exploitait l'exécutif du noyau NT pour servir les programmes Linux en tant que processus minimaux isolés et uniques (appelés "pico processus") liés au mode noyau "pico providers" en tant que gestionnaires d'appels système et d'exceptions dédiés, distincts de ceux d'un processus NT classique, en choisissant de réutiliser les implémentations NT existantes dans la mesure du possible.
+
+WSL1 ne peut pas exécuter tous les logiciels Linux, notamment les fichiers binaires 32bits, ou ceux nécessitant des services spécifiques du noyau Linux non implémentés dans WSL \textbf{[6]}. En raison de l'absence de "vrai" noyau Linux dans WSL1, les modules du noyau, tels que les pilotes de périphérique, ne peuvent pas être exécutés. WSL2, quant à lui, utilise des instances de noyau Linux virtualisées pour pallier ce problème.
+Il est possible d’exécuter certaines applications graphiques (comme Mozilla Firefox) en installant un serveur X11 dans l’environnement Windows (hôte) (Xming par exemple). Cependant, l'audio ou l'accélération matérielle ne sont pas pris en charge (ce qui entraîne de mauvaises performances graphiques). 
+La prise en charge d’OpenCL et de CUDA n’est pas non plus mise en œuvre actuellement, bien que celle-ci soit prévue pour les versions futures de WSL2.
+
+Microsoft a déclaré que WSL1 était destiné principalement au développement d'applications et non pas à l'exécution d'environnement de bureau ou de serveurs de production. Pour ce type d'usage, Microsoft recommande l'utilisation de machines virtuelles (Hyper-V), Kubernetes et Azure.
+Dans les tests de performance, les performances de WSL1 sont souvent proches des distributions Linux natives Ubuntu, Debian, Intel Clear Linux ou autres. Cependant, les performances observées sur les I/O sont très mauvaises pour WSL. Selon Microsoft, les modifications apportées à WSL sont censées offrir une vitesse multipliée par vingt sur certaines opérations par rapport à celle de WSL1
+
+\textbf{\subsection{WSL2}}
+
+Bien que WSL (dans cette conception initiale) soit beaucoup plus rapide et sans doute beaucoup plus populaire que les autres solutions permettant d'utiliser Linux sur Windows, les ingénieurs du noyau Windows ont eu du mal à augmenter les performances de WSL et la compatibilité des appels systèmes en essayant de remodeler le noyau NT existant pour qu'il reconnaisse et fonctionnent correctement sur l'API de Linux. Lors d'une conférence Microsoft Ignite en 2018, les ingénieurs Microsoft ont donné un aperçu d'une nouvelle technologie "légère" de machine virtuelle Hyper-V pour la conteneurisation dans laquelle un “vrai” noyau Linux virtualisé pouvait utiliser directement les primitives NT sur l'hôte. En 2019, Microsoft a annoncé une architecture WSL2 entièrement repensée, utilisant cette technologie VM légère hébergeant des images de noyau Linux réelles (personnalisées), revendiquant ainsi une compatibilité complète.
+\textbf{[5]} La version 2 introduit des modifications dans l'architecture. \textbf{[Figure 1]}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=210px]{Capture.png}
+  \caption{Comparaison WSL1/WSL2}
+  \Description{NJ/BB WSL2}
+\end{figure}
+
+Microsoft a opté pour la virtualisation via un sous-ensemble optimisé de fonctionnalités Hyper-V, afin d'exécuter le noyau fourni et les distributions sous-jacentes, offrant des performances équivalentes à WSL1. La compatibilité avec les versions antérieures est prévue, les développeurs n’ont donc pas besoin de changer quoi que ce soit dans leurs distributions publiées.
+L'installation de la distribution s'effectue sur un système de fichiers au format ext4 dans un disque virtuel. Le système de fichiers hôte est accessible de manière transparente via le protocole 9P.
+
+\textbf{\section{Les limites de WSL2}}
+WSL2 permet de travailler sur un Linux natif. 
+Tous les outils fonctionnant sur Linux fonctionnent également sur WSL. \textbf{[Figure 2]}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=160px]{compatible.png}
+  \caption{Compatible avec la plupart des applications Linux}
+  \Description{NJ/BB WSL2}
+\end{figure}
+
+Cependant, il existe des limites à cet outil notamment au niveau de la prise en charge des cartes graphiques. \textbf{[2]}
+En effet, WSL n’a pas un accès direct au Hardware et ne peut faire fonctionner CUDA (Compute Unified Device Architecture) ni OpenCL à ce jour.
+Voici un exemple d'outils classés dans un tableau dans lequel il est mentionné si celui-ci est pris en charge ou non par WSL2.
+\begin{table}[h]
+  \begin{tabular}{ll}
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Nom}} & \multicolumn{1}{c|}{\textbf{Prise en charge}} \\ \hline
+    \multicolumn{1}{|l|}{Docker} & \multicolumn{1}{l|}{Oui} \\ \hline
+    \multicolumn{1}{|l|}{Kubernetes} & \multicolumn{1}{l|}{Oui} \\ \hline
+    \multicolumn{1}{|l|}{Podman} & \multicolumn{1}{l|}{Oui} \\ \hline
+    \multicolumn{1}{|l|}{CUDA} & \multicolumn{1}{l|}{Non} \\ \hline
+    \multicolumn{1}{|l|}{OpenCl} & \multicolumn{1}{l|}{Non} \\ \hline
+    \multicolumn{1}{|l|}{Ansible} & \multicolumn{1}{l|}{Oui} \\ \hline
+    \multicolumn{1}{|l|}{Ubuntu/Debian/Fedora} & \multicolumn{1}{l|}{Oui} \\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{\section{Conclusion}}
+Microsoft s'inspire de plus en plus de ce qui fait l'intérêt et la force des grandes distributions Linux. Microsoft permet maintenant l'utilisation des systèmes Linux sans jamais avoir à quitter le système d'exploitation Microsoft.
+Leur objectif est de faire de Windows 10, l'OS qui permettra aux développeurs de tout avoir sur une même machine.
+Le nouveau terminal Windows en est un exemple. Il offre la possibilité de changer de langage à un autre: MS-Dos, Powershell et maintenant Bash en restant sur la même fenêtre.\\
+%
+% End of real shit here
+%
+
+% The next two lines define the bibliography style to be used, and the bibliography file.
+% REPLACE
+\bibliographystyle{ACM-Reference-Format}
+\nocite{*}
+\bibliography{mybib}
+
+% 
+% If your work has an appendix, this is the place to put it.
+% REPLACE
+\appendix
+
+\end{document}
